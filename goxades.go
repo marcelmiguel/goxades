@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	xmldsigPrefix string = ""
+	xmldsigPrefix string = "dsig"
 	Prefix        string = "xades"
 	Namespace     string = "http://uri.etsi.org/01903/v1.3.2#"
 )
@@ -160,7 +160,7 @@ func CreateSignature(signedData *etree.Element, ctx *SigningContext) (*etree.Ele
 		Tag:   dsig.SignatureTag,
 		Attr: []etree.Attr{
 			{Key: "Id", Value: "Signature"},
-			{Key: "xmlns", Value: dsig.Namespace},
+			{Key: "xmlns:" + xmldsigPrefix, Value: dsig.Namespace},
 			//{Space: "xmlns", Key: xmldsigPrefix, Value: dsig.Namespace},
 		},
 		Child: []etree.Token{signedInfo, signatureValue, keyInfo, object},
