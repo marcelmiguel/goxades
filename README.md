@@ -6,7 +6,7 @@ Implementation of XAdES signature in golang
 Install `goxades` using `go get`:
 
 ```
-$ go get github.com/artemkunich/goxades
+$ go get github.com/marcelmiguel/goxades
 ```
 
 ## Usage
@@ -24,7 +24,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	xades "github.com/artemkunich/goxades"
+	xades "github.com/marcelmiguel/goxades"
 	"github.com/beevik/etree"
 	dsig "github.com/russellhaering/goxmldsig"
 )
