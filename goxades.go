@@ -165,8 +165,9 @@ func CreateSignature(signedData *etree.Element, ctx *SigningContext) (*etree.Ele
 
 	signatureValue := createSignatureValue(signatureValueText)
 	keyInfo := createKeyInfo(base64.StdEncoding.EncodeToString(ctx.KeyStore.CertBinary))
-	unsignedProperties := createUnSignedProperties(&ctx.KeyStore, signingTime, ctx)
-	object := createObject(signedProperties, unsignedProperties)
+	//unsignedProperties := createUnSignedProperties(&ctx.KeyStore, signingTime, ctx)
+	//object := createObject(signedProperties, unsignedProperties)
+	object := createObject(signedProperties, nil) // TODO temporalilly
 
 	signature := etree.Element{
 		Space: xmldsigPrefix,
@@ -334,15 +335,29 @@ func createKeyInfo(base64Certificate string) *etree.Element {
 
 func createObject(signedProperties *etree.Element, unsignedProperties *etree.Element) *etree.Element {
 
-	qualifyingProperties := etree.Element{
-		Space: Prefix,
-		Tag:   QualifyingPropertiesTag,
-		Attr: []etree.Attr{
-			{Space: "xmlns", Key: Prefix, Value: Namespace},
-			{Key: targetAttr, Value: "#Signature"},
-		},
-		Child: []etree.Token{signedProperties, unsignedProperties},
+	var qualifyingProperties etree.Element
+	if unsignedProperties == nil {
+		qualifyingProperties = etree.Element{
+			Space: Prefix,
+			Tag:   QualifyingPropertiesTag,
+			Attr: []etree.Attr{
+				{Space: "xmlns", Key: Prefix, Value: Namespace},
+				{Key: targetAttr, Value: "#Signature"},
+			},
+			Child: []etree.Token{signedProperties},
+		}
+	} else {
+		qualifyingProperties = etree.Element{
+			Space: Prefix,
+			Tag:   QualifyingPropertiesTag,
+			Attr: []etree.Attr{
+				{Space: "xmlns", Key: Prefix, Value: Namespace},
+				{Key: targetAttr, Value: "#Signature"},
+			},
+			Child: []etree.Token{signedProperties, unsignedProperties},
+		}
 	}
+
 	object := etree.Element{
 		Space: xmldsigPrefix,
 		Tag:   "Object",
@@ -481,7 +496,13 @@ func createSignedProperties(keystore *MemoryX509KeyStore, signTime time.Time, ct
 		Space: "dsig",
 		Tag:   "DigestValue",
 	}
+<<<<<<< HEAD
 	sigPolicyHashValueTag.SetText(ctx.SignaturePolicy.SigPolicyhash)
+=======
+
+	hashPolicy := sha1.Sum([]byte(ctx.SignaturePolicy.Identifier))
+	sigPolicyHashValueTag.SetText(base64.StdEncoding.EncodeToString(hashPolicy[0:]))
+>>>>>>> 73a12a1c4a74046513d072d8454c364d7c37f9a6
 
 	sigPolicyHashTag := etree.Element{
 		Space: Prefix,
