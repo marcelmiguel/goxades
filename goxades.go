@@ -496,13 +496,9 @@ func createSignedProperties(keystore *MemoryX509KeyStore, signTime time.Time, ct
 		Space: "dsig",
 		Tag:   "DigestValue",
 	}
-<<<<<<< HEAD
 	sigPolicyHashValueTag.SetText(ctx.SignaturePolicy.SigPolicyhash)
-=======
-
-	hashPolicy := sha1.Sum([]byte(ctx.SignaturePolicy.Identifier))
-	sigPolicyHashValueTag.SetText(base64.StdEncoding.EncodeToString(hashPolicy[0:]))
->>>>>>> 73a12a1c4a74046513d072d8454c364d7c37f9a6
+	//hashPolicy := sha1.Sum([]byte(ctx.SignaturePolicy.Identifier))
+	//sigPolicyHashValueTag.SetText(base64.StdEncoding.EncodeToString(hashPolicy[0:]))
 
 	sigPolicyHashTag := etree.Element{
 		Space: Prefix,
