@@ -51,9 +51,10 @@ var signatureMethodIdentifiers = map[crypto.Hash]string{
 }
 
 type SignaturePolicy struct {
-	Identifier  string //
-	Description string //
-	Qualifier   string
+	Identifier    string //
+	Description   string //
+	Qualifier     string
+	SigPolicyhash string // this value must be fixed and depends on sign conditions
 }
 
 type SigningContext struct {
@@ -480,7 +481,7 @@ func createSignedProperties(keystore *MemoryX509KeyStore, signTime time.Time, ct
 		Space: "dsig",
 		Tag:   "DigestValue",
 	}
-	sigPolicyHashValueTag.SetText("hash") // TODO calc hash
+	sigPolicyHashValueTag.SetText(ctx.SignaturePolicy.SigPolicyhash)
 
 	sigPolicyHashTag := etree.Element{
 		Space: Prefix,
