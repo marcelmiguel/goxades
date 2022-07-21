@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"fmt"
 	"testing"
 	"time"
 
@@ -113,7 +114,8 @@ func getSigningContextMap(t *testing.T) (ctxMap map[*SigningContext]string) {
 			Canonicalizer: c14N10ExclusiveCanonicalizer,
 			Hash:          crypto.SHA256,
 			IsEnveloped:   true,
-			ReferenceURI:  "#signedData",
+			ReferenceID:   "signedData",
+			SignatureID:   "sinature_id_dodo",
 		},
 		PropertiesContext: SignedPropertiesContext{
 			Canonicalizer: c14N10ExclusiveCanonicalizer,
@@ -130,7 +132,8 @@ func getSigningContextMap(t *testing.T) (ctxMap map[*SigningContext]string) {
 		DataContext: SignedDataContext{
 			Canonicalizer: c14N10ExclusiveCanonicalizer,
 			Hash:          crypto.SHA1,
-			ReferenceURI:  "#signedData",
+			ReferenceID:   "signedData",
+			SignatureID:   "sinature_id_dodo",
 		},
 		PropertiesContext: SignedPropertiesContext{
 			Canonicalizer: c14N10ExclusiveCanonicalizer,
@@ -151,6 +154,8 @@ func TestSignature(t *testing.T) {
 	err := doc.ReadFromString(testXML)
 	require.NoError(t, err)
 
+	//root := removeComments(doc.Root())
+
 	signedData := doc.Root()
 
 	ctxMap := getSigningContextMap(t)
@@ -159,6 +164,39 @@ func TestSignature(t *testing.T) {
 		testSignature(t, signedData, ctx)
 		testSignatureValue(t, signedData, ctx, signatureValue)
 	}
+
+	b, err := canonicalSerialize(signedData)
+	if err != nil {
+		fmt.Printf("%v\n", err.Error())
+	}
+	fmt.Println(string(b))
+}
+
+func removeComments(elem *etree.Element) *etree.Element {
+	copy := elem.Copy()
+	for _, token := range copy.Child {
+		_, ok := token.(*etree.Comment)
+		if ok {
+			copy.RemoveChild(token)
+		}
+	}
+	for i, child := range elem.ChildElements() {
+		copy.ChildElements()[i] = removeComments(child)
+	}
+	return copy
+}
+
+func canonicalSerialize(el *etree.Element) ([]byte, error) {
+	doc := etree.NewDocument()
+	doc.SetRoot(el.Copy())
+
+	doc.WriteSettings = etree.WriteSettings{
+		CanonicalAttrVal: true,
+		CanonicalEndTags: false,
+		CanonicalText:    true,
+	}
+
+	return doc.WriteToBytes()
 }
 
 func testSignature(t *testing.T, signedData *etree.Element, ctx *SigningContext) {
@@ -208,7 +246,7 @@ func testSignedInfo(t *testing.T, signedInfo *etree.Element, ctx *SigningContext
 func testReferenceData(t *testing.T, referenceElement *etree.Element, ctx *SignedDataContext) {
 	idAttr := referenceElement.SelectAttr(":" + dsig.URIAttr)
 	require.NotEmpty(t, idAttr)
-	require.Equal(t, ctx.ReferenceURI, idAttr.Value)
+	require.Equal(t, ctx.ReferenceID, idAttr.Value)
 
 	transformsElement := referenceElement.FindElement(xmldsigPrefix + ":" + dsig.TransformsTag)
 	require.NotEmpty(t, transformsElement)

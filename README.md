@@ -1,6 +1,9 @@
 # goxades
 Implementation of XAdES signature in golang
 
+
+**** WIP **** Does not work yet
+
 ## Installation
 
 Install `goxades` using `go get`:
